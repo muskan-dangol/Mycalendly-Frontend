@@ -1,5 +1,10 @@
 import { api } from "./api";
-import type { User, LoginFormData, SignupFormData } from "../../types";
+import type {
+  ApiResponse,
+  User,
+  LoginFormData,
+  SignupFormData,
+} from "../../types";
 
 export interface AuthResponse {
   user: User;
@@ -8,14 +13,14 @@ export interface AuthResponse {
 
 export const authApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    login: builder.mutation<AuthResponse, LoginFormData>({
+    login: builder.mutation<ApiResponse<AuthResponse>, LoginFormData>({
       query: (credentials) => ({
         url: "/auth/login",
         method: "POST",
         body: credentials,
       }),
     }),
-    register: builder.mutation<AuthResponse, SignupFormData>({
+    register: builder.mutation<ApiResponse<AuthResponse>, SignupFormData>({
       query: (userFormData) => ({
         url: "/auth/register",
         method: "POST",

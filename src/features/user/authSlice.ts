@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { RootState } from "../../store";
+import type { RootState } from "../../app/store";
 import type { User } from "../../types";
 
 const userToken = localStorage.getItem("userToken")
@@ -27,10 +27,12 @@ const authSlice = createSlice({
     ) => {
       state.user = action.payload.user;
       state.token = action.payload.token;
+      localStorage.setItem("userToken", action.payload.token);
     },
     logout: (state) => {
       state.user = null;
       state.token = null;
+      localStorage.removeItem("userToken");
     },
   },
 });
@@ -40,3 +42,4 @@ export const { setCredentials, logout } = authSlice.actions;
 export default authSlice.reducer;
 
 export const selectCurrentUser = (state: RootState) => state.auth.user;
+export const selectCurrentToken = (state: RootState) => state.auth.token;
