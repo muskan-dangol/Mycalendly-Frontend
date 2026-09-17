@@ -1,12 +1,10 @@
-import { useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { setCredentials } from "../features/user/authSlice";
 import { useRegisterMutation } from "../app/services/authApi";
-import { Button } from "../components/ui/button.tsx";
-import { useAuth } from "../hooks/useAuth.ts";
+import { Button } from "../components/ui/button";
+import { useAuth } from "../hooks/useAuth";
 
 const SignupSchema = z
   .object({
@@ -32,11 +30,10 @@ const SignupSchema = z
 type SignupFormData = z.infer<typeof SignupSchema>;
 
 export const Signup = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [signup] = useRegisterMutation();
-  const { isAuthenticated } = useAuth();
+  useAuth();
 
   const {
     handleSubmit,
@@ -55,16 +52,11 @@ export const Signup = () => {
 
   const onSignUp = async (data: SignupFormData) => {
     try {
-      const res = await signup(data).unwrap();
-      dispatch(setCredentials({ user: res.user, token: res.token }));
+      await signup(data).unwrap();
 
-      if (isAuthenticated) {
-        navigate("/home");
-      }
+      navigate("/email-confirmation");
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error(err?.message || "Signup failed");
-      }
+      console.error("Signup failed", err);
     }
   };
 

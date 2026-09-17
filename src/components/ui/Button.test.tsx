@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
-import { Button } from "./button.tsx";
+import { Button } from "./button";
 
 describe("Button component", () => {
   it("renders the button with default props", () => {

@@ -1,6 +1,6 @@
 // import { useState } from "react";
 import { useEffect } from "react";
-import { isTokenValid } from "../lib/utils.ts";
+import { isTokenValid } from "../lib/utils";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -8,9 +8,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { setCredentials, logout } from "../features/user/authSlice";
 import { useLoginMutation } from "../app/services/authApi";
-import { Button } from "../components/ui/button.tsx";
+import { Button } from "../components/ui/button";
 import { Lock, Mail } from "lucide-react";
-import { useAuth } from "../hooks/useAuth.ts";
+import { useAuth } from "../hooks/useAuth";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Email is invalid" }),
@@ -40,9 +40,13 @@ export const Login = () => {
   const onLogin = async (data: LoginFormData) => {
     try {
       const res = await login(data).unwrap();
-      dispatch(setCredentials({ user: res.user, token: res.token }));
+      const authData = res.data;
+      if (!authData?.user || !authData.token) {
+        throw new Error("Login response did not include auth credentials");
+      }
+      dispatch(setCredentials({ user: authData.user, token: authData.token }));
 
-      navigate("/home");
+      navigate("/");
     } catch (err: unknown) {
       if (err instanceof Error) {
         console.error(err?.message || "Login failed");
@@ -62,7 +66,7 @@ export const Login = () => {
   // Redirect if already logged in with valid token
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/home", { replace: true });
+      navigate("/", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
