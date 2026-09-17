@@ -38,7 +38,6 @@ export const EmailVerification = () => {
   }, [token, verifyEmail]);
 
   return (
-    // Uncomment the below code if you want to display the verification status in a different way
     <div>
       {currentStatus === "verifying" && (
         <div className="text-center space-y-6">
