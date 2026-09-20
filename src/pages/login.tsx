@@ -9,6 +9,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { setCredentials, logout } from "../features/user/authSlice";
 import { useLoginMutation } from "../app/services/authApi";
 import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
 import { Lock, Mail } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
@@ -62,7 +64,7 @@ export const Login = () => {
       navigate("/login", { replace: true });
     }
   }, [isAuthenticated, dispatch, navigate]);
-  
+
   // Redirect if already logged in with valid token
   useEffect(() => {
     if (isAuthenticated) {
@@ -80,62 +82,53 @@ export const Login = () => {
       <h1 className="text-green-600 text-sm sm:text-md md:text-lg lg:text-xl mb-4">
         Welcome to MyCalendly
       </h1>
-      <h3 className="text-white text-lg">Enter your login credentials</h3>
+      <h2 className="text-white text-lg">Enter your login credentials</h2>
       <form onSubmit={handleSubmit(onLogin)} noValidate>
         {/* email */}
-        <label
-          htmlFor="email"
-          className="block mt-4 mb-2 text-left text-white font-bold"
-        >
+        <Label htmlFor="email" className="mt-4">
           Email:
-        </label>
-        <div className="relative mb-2">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="email"
-            id="email"
-            placeholder="Enter your Email"
-            className="block w-full pl-10 pr-4 py-1 border border-gray-300 rounded-md focus:outline-none focus:border-green-400"
-            required
-            {...register("email")}
-          />
-        </div>
+        </Label>
+        <Input
+          type="email"
+          id="email"
+          icon={<Mail className="w-5 h-5" />}
+          wrapperClassName="mb-2"
+          placeholder="Enter your Email"
+          required
+          {...register("email")}
+        />
 
         {errors.email && (
           <p className="text-red-500 text-sm">{errors.email.message}</p>
         )}
 
         {/* password */}
-        {/* <link
-          to="/password-reset"
-          className="text-xs text-primary hover:underline font-medium"
-        >
-          Forgot password?
-        </link> */}
-        <label
-          htmlFor="password"
-          className="block mb-2 text-left text-white font-bold"
-        >
-          Password:
-        </label>
+        <Label htmlFor="password">Password:</Label>
 
-        <div className="relative mb-6">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
+        <div className="mb-6">
+          <Input
             type="password"
             id="password"
+            icon={<Lock className="w-5 h-5" />}
+            wrapperClassName="mb-2"
             placeholder="Enter your Password"
-            className="block w-full pl-10 pr-4 py-1 border border-gray-300 rounded-md focus:outline-none focus:border-green-400"
             required
             {...register("password")}
           />
+          <Link
+            to="/reset-password-request"
+            className="block w-fit ml-auto text-xs text-blue-500 hover:underline font-medium mt-1"
+          >
+            Forgot password?
+          </Link>
         </div>
+
         {errors.password && (
           <p className="text-red-500 text-sm">{errors.password.message}</p>
         )}
         <div className="w-full flex justify-center items-center mb-6">
           <Button type="submit" className="w-full" variant="default">
-            Submit
+            Login
           </Button>
         </div>
       </form>

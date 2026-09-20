@@ -33,7 +33,7 @@ describe("Login component", () => {
     const passwordLabel = screen.getByLabelText(/password/i);
     const passwordInput = screen.getByLabelText(/password/i);
 
-    const loginButton = screen.getByRole("button", { name: /submit/i });
+    const loginButton = screen.getByRole("button", { name: /login/i });
 
     expect(emailLabel).toBeInTheDocument();
     expect(emailInput).toBeInTheDocument();
@@ -53,7 +53,7 @@ describe("Login component", () => {
     );
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
-    const loginButton = screen.getByRole("button", { name: /submit/i });
+    const loginButton = screen.getByRole("button", { name: /login/i });
 
     await user.type(emailInput, "user");
     await user.type(passwordInput, "short123");
@@ -73,7 +73,7 @@ describe("Login component", () => {
     );
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
-    const loginButton = screen.getByRole("button", { name: /submit/i });
+    const loginButton = screen.getByRole("button", { name: /login/i });
 
     await user.type(emailInput, "user@example.com");
     await user.type(passwordInput, "sh");
@@ -94,7 +94,7 @@ describe("Login component", () => {
     );
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
-    const loginButton = screen.getByRole("button", { name: /submit/i });
+    const loginButton = screen.getByRole("button", { name: /login/i });
 
     await user.clear(emailInput);
     await user.clear(passwordInput);
@@ -119,7 +119,7 @@ describe("Login component", () => {
 
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/password/i);
-    const loginButton = screen.getByRole("button", { name: /submit/i });
+    const loginButton = screen.getByRole("button", { name: /login/i });
 
     await user.type(emailInput, "user@example.com");
     await user.type(passwordInput, "password123");

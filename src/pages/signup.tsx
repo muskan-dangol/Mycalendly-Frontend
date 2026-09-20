@@ -4,6 +4,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRegisterMutation } from "../app/services/authApi";
 import { Button } from "../components/ui/button";
+import { Label } from "../components/ui/label";
+import { Input } from "../components/ui/input";
 import { useAuth } from "../hooks/useAuth";
 
 const SignupSchema = z
@@ -65,25 +67,25 @@ export const Signup = () => {
       <h1 className="text-green-600 text-sm sm:text-md md:text-lg lg:text-xl">
         Welcome to MyCalendly
       </h1>
-      <h3 className="text-white text-lg mb-4">Enter your signup credentials</h3>
+      <h2 className="text-white text-lg mb-4">Enter your signup credentials</h2>
       <form onSubmit={handleSubmit(onSignUp)} noValidate>
         <div className="w-full flex justify-between gap-6">
           {/* firstName */}
           <div className="w-full">
-            <label
+            <Label
               htmlFor="firstName"
               className="block mt-4 mb-2 text-left text-white font-bold"
             >
               First Name:
-            </label>
-            <input
+            </Label>
+            <Input
               type="text"
               id="firstName"
               placeholder="Enter your First Name"
               className="block w-full mb-2 px-4 py-1 border border-gray-300 rounded-md focus:outline-none focus:border-green-400"
               required
               {...register("firstName")}
-            ></input>
+            ></Input>
             {errors.firstName && (
               <p className="text-red-500 text-sm">{errors.firstName.message}</p>
             )}
@@ -91,20 +93,20 @@ export const Signup = () => {
 
           {/* lastname */}
           <div className="w-full">
-            <label
+            <Label
               htmlFor="lastName"
               className="block mt-4 mb-2 text-left text-white font-bold"
             >
               Last Name:
-            </label>
-            <input
+            </Label>
+            <Input
               type="text"
               id="lastName"
               placeholder="Enter your Last Name"
               className="block w-full mb-2 px-4 py-1 border border-gray-300 rounded-md focus:outline-none focus:border-green-400"
               required
               {...register("lastName")}
-            ></input>
+            ></Input>
             {errors.lastName && (
               <p className="text-red-500 text-sm">{errors.lastName.message}</p>
             )}
@@ -112,58 +114,58 @@ export const Signup = () => {
         </div>
 
         {/* email */}
-        <label
+        <Label
           htmlFor="email"
           className="block mb-2 text-left text-white font-bold"
         >
           Email:
-        </label>
-        <input
+        </Label>
+        <Input
           type="email"
           id="email"
           placeholder="Enter your Email"
           className="block w-full mb-2 px-4 py-1 border border-gray-300 rounded-md focus:outline-none focus:border-green-400"
           required
           {...register("email")}
-        ></input>
+        ></Input>
         {errors.email && (
           <p className="text-red-500 text-sm">{errors.email.message}</p>
         )}
 
         {/* password */}
-        <label
+        <Label
           htmlFor="password"
           className="block mb-2 text-left text-white font-bold"
         >
           Password:
-        </label>
-        <input
+        </Label>
+        <Input
           type={"password"}
           id="password"
           placeholder="Enter your Password"
           className="block w-full mb-2 px-4 py-1 border border-gray-300 rounded-md focus:outline-none focus:border-green-400"
           required
           {...register("password")}
-        ></input>
+        ></Input>
         {errors.password && (
           <p className="text-red-500 text-sm">{errors.password.message}</p>
         )}
 
         {/* confirm password */}
-        <label
+        <Label
           htmlFor="confirmPassword"
           className="block mb-2 text-left text-white font-bold"
         >
           Confirm Password:
-        </label>
-        <input
+        </Label>
+        <Input
           type={"password"}
           id="confirmPassword"
           placeholder="Enter your Confirm Password"
           className="block w-full mb-6 px-4 py-1 border border-gray-300 rounded-md focus:outline-none focus:border-green-400"
           required
           {...register("confirmPassword")}
-        ></input>
+        ></Input>
         {errors.confirmPassword && (
           <p className="text-red-500 text-sm">
             {errors.confirmPassword.message}
