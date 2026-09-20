@@ -18,7 +18,7 @@ const buttonVariants = cva(
           "bg-[var(--social-bg)] text-[var(--text-h)] hover:bg-opacity-80",
         ghost:
           "bg-transparent text-[var(--text-h)] hover:bg-[var(--accent-bg)]",
-        link: "bg-transparent underline text-[var(--accent)] px-0 py-0 h-auto",
+        link: "bg-transparent underline text-[var(--accent)] px-0 py-0 h-auto cursor-pointer",
         hero: "bg-white text-[var(--heading)] shadow-md px-8 py-4 rounded-xl",
         heroOutline:
           "bg-transparent border-2 border-[var(--accent-border)] text-[var(--accent)] px-8 py-4 rounded-xl",

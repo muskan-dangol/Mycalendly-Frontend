@@ -5,6 +5,8 @@ import { HomePage } from "./pages/home";
 import { EmailConfirmation } from "./pages/emailConfirmation";
 import { EmailVerification } from "./pages/emailVerification";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { ResetPassword } from "./pages/resetPassword";
+import { PasswordResetRequest } from "./pages/passwordResetRequest";
 
 const router = createBrowserRouter([
   { path: "/signup", element: <Signup /> },
@@ -12,6 +14,8 @@ const router = createBrowserRouter([
   { path: "/", element: <ProtectedRoute><HomePage /></ProtectedRoute> },
   { path: "/email-confirmation", element: <EmailConfirmation /> },
   { path: "/verify-email", element: <EmailVerification /> },
+  { path: "/reset-password-request", element: <PasswordResetRequest /> },
+  { path: "/reset-password", element: <ResetPassword /> },
 ]);
 
 const App = () => {
