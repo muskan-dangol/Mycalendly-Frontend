@@ -1,8 +1,10 @@
 import { MemoryRouter } from "react-router-dom";
-import { ResetPassword } from "./resetPassword";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
+import { Provider } from "react-redux";
+import { store } from "../app/store";
+import { ResetPassword } from "./resetPassword";
 
 const mockResetPassword = vi.fn();
 const mockUnwrap = vi.fn(async () => ({ message: "changed" }));
@@ -43,14 +45,19 @@ beforeEach(() => {
   mockUnwrap.mockImplementation(async () => ({ message: "changed" }));
 });
 
+const renderWithProviders = (ui: React.ReactElement) =>
+  render(
+    <Provider store={store}>
+      <MemoryRouter initialEntries={["/reset-password?token=test-token"]}>
+        {ui}
+      </MemoryRouter>
+    </Provider>,
+  );
+
 // Tests for the ResetPassword component
 describe("ResetPassword component", () => {
   it("should display the reset password form", async () => {
-    render(
-      <MemoryRouter>
-        <ResetPassword />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<ResetPassword />);
 
     expect(screen.getByPlaceholderText("New password")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Confirm password")).toBeInTheDocument();
@@ -59,11 +66,7 @@ describe("ResetPassword component", () => {
 
   it("should show a mismatch error for different passwords", async () => {
     const user = userEvent.setup();
-    render(
-      <MemoryRouter initialEntries={["/reset-password?token=test-token"]}>
-        <ResetPassword />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<ResetPassword />);
 
     expect(screen.getByPlaceholderText("New password")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Confirm password")).toBeInTheDocument();
@@ -85,11 +88,7 @@ describe("ResetPassword component", () => {
 
   it("should successfully reset the password when inputs are valid", async () => {
     const user = userEvent.setup();
-    render(
-      <MemoryRouter initialEntries={["/reset-password?token=test-token"]}>
-        <ResetPassword />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<ResetPassword />);
 
     const newPasswordInput = screen.getByPlaceholderText("New password");
     const confirmPasswordInput =
@@ -111,11 +110,7 @@ describe("ResetPassword component", () => {
 
   it("should show an error when the reset password field is empty", async () => {
     const user = userEvent.setup();
-    render(
-      <MemoryRouter initialEntries={["/reset-password?token=test-token"]}>
-        <ResetPassword />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<ResetPassword />);
 
     const submitButton = screen.getByRole("button", { name: /Submit/i });
     await user.click(submitButton);

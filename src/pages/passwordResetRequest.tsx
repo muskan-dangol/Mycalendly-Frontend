@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { Mail } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -8,15 +8,18 @@ import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { useRequestPasswordResetMutation } from "../app/services/passwordApi";
-
-const PasswordResetFormSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
-});
-
-type ProvideRegisteredEmailFormData = z.infer<typeof PasswordResetFormSchema>;
+import { useAuth } from "../hooks/useAuth";
 
 // Component for recovering user identity by providing a registered email.
 export const PasswordResetRequest = () => {
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  const [requestPasswordReset, { isLoading }] =
+    useRequestPasswordResetMutation();
+
   const {
     handleSubmit,
     register,
@@ -25,10 +28,21 @@ export const PasswordResetRequest = () => {
     resolver: zodResolver(PasswordResetFormSchema),
     defaultValues: { email: "" },
   });
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [requestPasswordReset, { isLoading }] =
-    useRequestPasswordResetMutation();
-  const navigate = useNavigate();
+
+  const resetForm = useForm<ProvideRegisteredEmailFormData>({
+    resolver: zodResolver(PasswordResetFormSchema),
+    defaultValues: { email: "" },
+  });
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  if (isAuthenticated) {
+    return null;
+  }
 
   const handleProvideRegisteredEmail = async (
     data: ProvideRegisteredEmailFormData,
@@ -37,11 +51,6 @@ export const PasswordResetRequest = () => {
 
     setIsSubmitted(true);
   };
-
-  const resetForm = useForm<ProvideRegisteredEmailFormData>({
-    resolver: zodResolver(PasswordResetFormSchema),
-    defaultValues: { email: "" },
-  });
 
   if (isSubmitted) {
     return (
@@ -152,3 +161,9 @@ export const PasswordResetRequest = () => {
     </div>
   );
 };
+
+const PasswordResetFormSchema = z.object({
+  email: z.string().email({ message: "Invalid email address" }),
+});
+
+type ProvideRegisteredEmailFormData = z.infer<typeof PasswordResetFormSchema>;

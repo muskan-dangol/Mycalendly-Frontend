@@ -62,7 +62,7 @@ export const Login = () => {
       navigate("/login", { replace: true });
     }
   }, [isAuthenticated, dispatch, navigate]);
-  
+
   // Redirect if already logged in with valid token
   useEffect(() => {
     if (isAuthenticated) {
@@ -105,13 +105,6 @@ export const Login = () => {
           <p className="text-red-500 text-sm">{errors.email.message}</p>
         )}
 
-        {/* password */}
-        {/* <link
-          to="/password-reset"
-          className="text-xs text-primary hover:underline font-medium"
-        >
-          Forgot password?
-        </link> */}
         <label
           htmlFor="password"
           className="block mb-2 text-left text-white font-bold"
@@ -119,7 +112,7 @@ export const Login = () => {
           Password:
         </label>
 
-        <div className="relative mb-6">
+        <div className="relative mb-2">
           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="password"
@@ -130,10 +123,19 @@ export const Login = () => {
             {...register("password")}
           />
         </div>
+
+        {/* password */}
+        <Link
+          to="/reset-password-request"
+          className="text-xs text-primary hover:underline font-medium flex justify-end"
+        >
+          Forgot password?
+        </Link>
+
         {errors.password && (
           <p className="text-red-500 text-sm">{errors.password.message}</p>
         )}
-        <div className="w-full flex justify-center items-center mb-6">
+        <div className="w-full flex justify-center items-center mt-6 mb-6">
           <Button type="submit" className="w-full" variant="default">
             Submit
           </Button>

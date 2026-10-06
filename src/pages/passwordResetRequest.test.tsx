@@ -2,7 +2,9 @@ import { render, screen } from "@testing-library/react";
 import { waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
+import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
+import { store } from "../app/store";
 import { PasswordResetRequest } from "./passwordResetRequest";
 
 const mockChangePassword = vi.fn();
@@ -41,35 +43,30 @@ beforeEach(() => {
   mockUnwrap.mockImplementation(async () => ({ message: "changed" }));
 });
 
+const renderWithProviders = (ui: React.ReactElement) =>
+  render(
+    <Provider store={store}>
+      <MemoryRouter>{ui}</MemoryRouter>
+    </Provider>,
+  );
+
 // test before submitting the PasswordResetRequest component
 describe("ChangePassword Component", () => {
   it("should render the PasswordResetRequest component page", () => {
-    render(
-      <MemoryRouter>
-        <PasswordResetRequest />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<PasswordResetRequest />);
 
     expect(screen.getByText("Lets find your account")).toBeInTheDocument();
   });
 
   it("should have an input for an email", () => {
-    render(
-      <MemoryRouter>
-        <PasswordResetRequest />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<PasswordResetRequest />);
 
     expect(screen.getByText("Email:")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("email address")).toBeInTheDocument();
   });
 
   it("should have a button to continue changing the password", () => {
-    render(
-      <MemoryRouter>
-        <PasswordResetRequest />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<PasswordResetRequest />);
 
     expect(
       screen.getByRole("button", { name: /Continue/i }),
@@ -78,11 +75,7 @@ describe("ChangePassword Component", () => {
 
   it("should give invalid email address on providing an incorrect email", async () => {
     const user = userEvent.setup();
-    render(
-      <MemoryRouter>
-        <PasswordResetRequest />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<PasswordResetRequest />);
 
     const button = screen.getByRole("button", { name: /Continue/i });
     expect(button).toBeInTheDocument();
@@ -106,11 +99,7 @@ describe("ChangePassword Component", () => {
     );
 
     const user = userEvent.setup();
-    render(
-      <MemoryRouter>
-        <PasswordResetRequest />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<PasswordResetRequest />);
 
     const button = screen.getByRole("button", { name: /Continue/i });
     expect(button).toBeInTheDocument();
@@ -137,11 +126,7 @@ describe("ChangePassword Component", () => {
 describe("After submitting the PasswordResetRequest component", () => {
   it("should display success message for a successful password reset request sent to email", async () => {
     const user = userEvent.setup();
-    render(
-      <MemoryRouter>
-        <PasswordResetRequest />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<PasswordResetRequest />);
 
     await user.type(
       screen.getByPlaceholderText("email address"),

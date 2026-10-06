@@ -14,7 +14,7 @@ export const passwordApi = api.injectEndpoints({
   endpoints: (builder) => ({
     requestPasswordReset: builder.mutation<void, requestPasswordResetData>({
       query: (data) => ({
-        url: "password/reset-password/request",
+        url: "password-reset/request",
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -25,7 +25,7 @@ export const passwordApi = api.injectEndpoints({
 
     resetPassword: builder.mutation<void, resetPasswordData>({
       query: (data) => ({
-        url: "password/reset-password/confirm",
+        url: "password-reset/confirm",
         method: "POST",
         headers: {
           "Content-Type": "application/json",

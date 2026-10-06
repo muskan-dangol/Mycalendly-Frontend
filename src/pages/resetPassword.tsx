@@ -1,5 +1,7 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useEffect } from "react";
+import { useAuth } from "../hooks/useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../components/ui/button.tsx";
 import { Lock } from "lucide-react";
@@ -8,26 +10,13 @@ import { Input } from "../components/ui/input.tsx";
 import { Label } from "../components/ui/label.tsx";
 import { useResetPasswordMutation } from "../app/services/passwordApi.ts";
 
-const passwordResetSchema = z
-  .object({
-    token: z.string().nonempty("Token is required"),
-    newPassword: z
-      .string()
-      .min(6, "Password must be at least 6 characters long"),
-    confirmPassword: z
-      .string()
-      .min(6, "Password must be at least 6 characters long"),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-
-type ResetPasswordFormData = z.infer<typeof passwordResetSchema>;
-
 export const ResetPassword = () => {
   const [searchParams] = useSearchParams();
   const tokenFromUrl = searchParams.get("token") ?? "";
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  const [resetPassword, { isLoading }] = useResetPasswordMutation();
 
   const {
     handleSubmit,
@@ -42,8 +31,15 @@ export const ResetPassword = () => {
     },
   });
 
-  const [resetPassword, { isLoading }] = useResetPasswordMutation();
-  const navigate = useNavigate();
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  if (isAuthenticated) {
+    return null;
+  }
 
   const handleChangePassword = async (data: ResetPasswordFormData) => {
     await resetPassword(data).unwrap();
@@ -106,3 +102,20 @@ export const ResetPassword = () => {
     </div>
   );
 };
+
+const passwordResetSchema = z
+  .object({
+    token: z.string().nonempty("Token is required"),
+    newPassword: z
+      .string()
+      .min(6, "Password must be at least 6 characters long"),
+    confirmPassword: z
+      .string()
+      .min(6, "Password must be at least 6 characters long"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+type ResetPasswordFormData = z.infer<typeof passwordResetSchema>;
