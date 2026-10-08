@@ -27,7 +27,7 @@ const mockRegister = vi.fn(
 );
 
 vi.mock("../app/services/authApi", () => ({
-  useRegisterMutation: () => [mockRegister],
+  useRegisterMutation: () => [mockRegister, { isLoading: false, isError: false, error: undefined }],
 }));
 
 describe("Signup Component", () => {
@@ -43,8 +43,8 @@ describe("Signup Component", () => {
     const emailLabel = screen.getByLabelText(/email/i);
     const emailInput = screen.getByLabelText(/email/i);
 
-    const passwordLabel = screen.getByPlaceholderText("Enter your Password");
-    const passwordInput = screen.getByPlaceholderText("Enter your Password");
+    const passwordLabel = screen.getByPlaceholderText(".........");
+    const passwordInput = screen.getByPlaceholderText(".........");
 
     const firstNameLabel = screen.getByLabelText(/first name/i);
     const firstNameInput = screen.getByLabelText(/first name/i);
@@ -77,11 +77,11 @@ describe("Signup Component", () => {
       </Provider>,
     );
     const emailInput = screen.getByLabelText(/email/i);
-    const passwordInput = screen.getByPlaceholderText("Enter your Password");
+    const passwordInput = screen.getByPlaceholderText(".........");
     const firstNameInput = screen.getByLabelText(/first name/i);
     const lastNameInput = screen.getByLabelText(/last name/i);
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
-    const signupButton = screen.getByRole("button", { name: /submit/i });
+    const signupButton = screen.getByRole("button", { name: /sign up/i });
 
     await user.type(emailInput, "invalid");
     await user.type(passwordInput, "password123");
@@ -104,11 +104,11 @@ describe("Signup Component", () => {
       </Provider>,
     );
     const emailInput = screen.getByLabelText(/email/i);
-    const passwordInput = screen.getByPlaceholderText("Enter your Password");
+    const passwordInput = screen.getByPlaceholderText(".........");
     const firstNameInput = screen.getByLabelText(/first name/i);
     const lastNameInput = screen.getByLabelText(/last name/i);
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
-    const signupButton = screen.getByRole("button", { name: /submit/i });
+    const signupButton = screen.getByRole("button", { name: /sign up/i });
 
     await user.type(emailInput, "test@example.com");
     await user.type(passwordInput, "123");
@@ -133,11 +133,11 @@ describe("Signup Component", () => {
       </Provider>,
     );
     const emailInput = screen.getByLabelText(/email/i);
-    const passwordInput = screen.getByPlaceholderText("Enter your Password");
+    const passwordInput = screen.getByPlaceholderText(".........");
     const firstNameInput = screen.getByLabelText(/first name/i);
     const lastNameInput = screen.getByLabelText(/last name/i);
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
-    const signupButton = screen.getByRole("button", { name: /submit/i });
+    const signupButton = screen.getByRole("button", { name: /sign up/i });
 
     await user.type(emailInput, "test@example.com");
     await user.type(passwordInput, "password123");
@@ -159,7 +159,7 @@ describe("Signup Component", () => {
         </MemoryRouter>
       </Provider>,
     );
-    const signupButton = screen.getByRole("button", { name: /submit/i });
+    const signupButton = screen.getByRole("button", { name: /sign up/i });
 
     await user.click(signupButton);
 

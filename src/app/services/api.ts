@@ -12,7 +12,7 @@ export const baseQuery = fetchBaseQuery({
   },
 });
 
-const baseQueryWithRetry = retry(baseQuery, { maxRetries: 6 });
+const baseQueryWithRetry = retry(baseQuery, { maxRetries: 2 });
 
 export const api = createApi({
   reducerPath: "api",

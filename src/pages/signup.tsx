@@ -1,39 +1,18 @@
 import { useNavigate, Link } from "react-router-dom";
+import type { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
+import { Lock, Mail, User } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRegisterMutation } from "../app/services/authApi";
 import { Button } from "../components/ui/button";
-import { useAuth } from "../hooks/useAuth";
-
-const SignupSchema = z
-  .object({
-    email: z.string().email({ message: "Invalid email address" }),
-    password: z
-      .string()
-      .min(6, { message: "Password must be at least 6 characters" }),
-    firstName: z
-      .string()
-      .min(2, { message: "FirstName must be at least 2 characters" }),
-    lastName: z
-      .string()
-      .min(2, { message: "LastName must be at least 2 characters" }),
-    confirmPassword: z
-      .string()
-      .min(6, { message: "Confirm Password must be equal to Password" }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-
-type SignupFormData = z.infer<typeof SignupSchema>;
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
 
 export const Signup = () => {
   const navigate = useNavigate();
 
-  const [signup] = useRegisterMutation();
-  useAuth();
+  const [signup, { isLoading, isError, error }] = useRegisterMutation();
 
   const {
     handleSubmit,
@@ -60,30 +39,59 @@ export const Signup = () => {
     }
   };
 
+  const signupErrorMessage = (() => {
+    if (!isError || !error) {
+      return "An error occurred";
+    }
+
+    const apiError = error as FetchBaseQueryError & { data?: unknown };
+
+    if (typeof apiError.data === "string") {
+      return apiError.data;
+    }
+
+    if (
+      apiError.data &&
+      typeof apiError.data === "object" &&
+      "message" in apiError.data &&
+      typeof apiError.data.message === "string"
+    ) {
+      return apiError.data.message;
+    }
+
+    return "An error occurred";
+  })();
+
   return (
     <div className="w-2/3 md:w-1/2 p-2 lg:p-8 bg-gray-800 rounded-lg shadow-md items-center justify-center">
       <h1 className="text-green-600 text-sm sm:text-md md:text-lg lg:text-xl">
         Welcome to MyCalendly
       </h1>
-      <h3 className="text-white text-lg mb-4">Enter your signup credentials</h3>
+      <p className="text-white text-lg mb-4">Enter your signup credentials</p>
+
+      {isError && (
+        <h3 className="text-red-500 text-sm mt-2">{signupErrorMessage}</h3>
+      )}
+
       <form onSubmit={handleSubmit(onSignUp)} noValidate>
         <div className="w-full flex justify-between gap-6">
           {/* firstName */}
           <div className="w-full">
-            <label
+            <Label
               htmlFor="firstName"
               className="block mt-4 mb-2 text-left text-white font-bold"
             >
               First Name:
-            </label>
-            <input
+            </Label>
+            <Input
               type="text"
               id="firstName"
-              placeholder="Enter your First Name"
-              className="block w-full mb-2 px-4 py-1 border border-gray-300 rounded-md focus:outline-none focus:border-green-400"
+              icon={<User className="w-5 h-5" />}
+              placeholder="First name"
               required
               {...register("firstName")}
-            ></input>
+            />
+
             {errors.firstName && (
               <p className="text-red-500 text-sm">{errors.firstName.message}</p>
             )}
@@ -91,20 +99,20 @@ export const Signup = () => {
 
           {/* lastname */}
           <div className="w-full">
-            <label
+            <Label
               htmlFor="lastName"
               className="block mt-4 mb-2 text-left text-white font-bold"
             >
               Last Name:
-            </label>
-            <input
+            </Label>
+            <Input
               type="text"
               id="lastName"
-              placeholder="Enter your Last Name"
-              className="block w-full mb-2 px-4 py-1 border border-gray-300 rounded-md focus:outline-none focus:border-green-400"
+              placeholder="Last name"
               required
               {...register("lastName")}
-            ></input>
+            />
+
             {errors.lastName && (
               <p className="text-red-500 text-sm">{errors.lastName.message}</p>
             )}
@@ -112,58 +120,62 @@ export const Signup = () => {
         </div>
 
         {/* email */}
-        <label
+        <Label
           htmlFor="email"
-          className="block mb-2 text-left text-white font-bold"
+          className="block mt-4 mb-2 text-left text-white font-bold"
         >
           Email:
-        </label>
-        <input
+        </Label>
+        <Input
           type="email"
           id="email"
-          placeholder="Enter your Email"
-          className="block w-full mb-2 px-4 py-1 border border-gray-300 rounded-md focus:outline-none focus:border-green-400"
+          icon={<Mail className="w-5 h-5" />}
+          placeholder="example@gmail.com"
           required
           {...register("email")}
-        ></input>
+        />
+
         {errors.email && (
           <p className="text-red-500 text-sm">{errors.email.message}</p>
         )}
 
         {/* password */}
-        <label
+        <Label
           htmlFor="password"
-          className="block mb-2 text-left text-white font-bold"
+          className="block mt-4 mb-2 text-left text-white font-bold"
         >
           Password:
-        </label>
-        <input
+        </Label>
+        <Input
           type={"password"}
           id="password"
-          placeholder="Enter your Password"
-          className="block w-full mb-2 px-4 py-1 border border-gray-300 rounded-md focus:outline-none focus:border-green-400"
+          icon={<Lock className="w-5 h-5" />}
+          placeholder="........."
           required
           {...register("password")}
-        ></input>
+        />
+
         {errors.password && (
           <p className="text-red-500 text-sm">{errors.password.message}</p>
         )}
 
         {/* confirm password */}
-        <label
+        <Label
           htmlFor="confirmPassword"
-          className="block mb-2 text-left text-white font-bold"
+          className="block mt-4 mb-2 text-left text-white font-bold"
         >
           Confirm Password:
-        </label>
-        <input
+        </Label>
+        <Input
           type={"password"}
           id="confirmPassword"
+          icon={<Lock className="w-5 h-5" />}
           placeholder="Enter your Confirm Password"
-          className="block w-full mb-6 px-4 py-1 border border-gray-300 rounded-md focus:outline-none focus:border-green-400"
+          wrapperClassName=" mb-6 py-1"
           required
           {...register("confirmPassword")}
-        ></input>
+        />
+
         {errors.confirmPassword && (
           <p className="text-red-500 text-sm">
             {errors.confirmPassword.message}
@@ -172,10 +184,11 @@ export const Signup = () => {
 
         <div className="w-full flex justify-center items-center mb-6">
           <Button type="submit" className="w-full" variant="default">
-            Submit
+            {isLoading ? "Signing up..." : "Sign up"}
           </Button>
         </div>
       </form>
+
       <p className="mt-4">
         <>Already have an account? </>
         <Link
@@ -191,3 +204,26 @@ export const Signup = () => {
 };
 
 export default Signup;
+
+const SignupSchema = z
+  .object({
+    email: z.string().email({ message: "Invalid email address" }),
+    password: z
+      .string()
+      .min(6, { message: "Password must be at least 6 characters" }),
+    firstName: z
+      .string()
+      .min(2, { message: "FirstName must be at least 2 characters" }),
+    lastName: z
+      .string()
+      .min(2, { message: "LastName must be at least 2 characters" }),
+    confirmPassword: z
+      .string()
+      .min(6, { message: "Confirm Password must be equal to Password" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+type SignupFormData = z.infer<typeof SignupSchema>;
