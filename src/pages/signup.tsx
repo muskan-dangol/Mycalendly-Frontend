@@ -1,18 +1,40 @@
 import { useNavigate, Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import { Lock, Mail, User } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRegisterMutation } from "../app/services/authApi";
+import {
+  GoogleLogin,
+  GoogleOAuthProvider,
+  type CredentialResponse,
+} from "@react-oauth/google";
+import {
+  useRegisterMutation,
+  useGoogleAuthMutation,
+} from "../app/services/authApi";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { setCredentials } from "../features/user/authSlice";
+import { useToast } from "../hooks/useToast";
+import { Separator } from "../components/ui/separator";
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+const delay = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
 
 export const Signup = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const [signup, { isLoading, isError, error }] = useRegisterMutation();
+  const [googleAuth] = useGoogleAuthMutation();
 
   const {
     handleSubmit,
@@ -39,6 +61,53 @@ export const Signup = () => {
     }
   };
 
+  const handleGoogleAuth = async (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential || !credentialResponse.clientId) {
+      toast({
+        title: "Google login failed",
+        description: "No credential received from Google",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const authResponse = await googleAuth({
+        idToken: credentialResponse.credential,
+        clientId: credentialResponse.clientId,
+      }).unwrap();
+
+      const authData = authResponse.data;
+      if (!authData?.user || !authData?.token) {
+        throw new Error(
+          "Google login response did not include auth credentials",
+        );
+      }
+
+      dispatch(setCredentials({ user: authData.user, token: authData.token }));
+
+      await delay(import.meta.env.POST_LOGIN_REDIRECT_DELAY_MS);
+      navigate("/", { replace: true });
+    } catch (error) {
+      toast({
+        title: "Google login failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to login with Google. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast({
+      title: "Google login failed",
+      description: "Failed to authenticate with Google",
+      variant: "destructive",
+    });
+  };
+
   const signupErrorMessage = (() => {
     if (!isError || !error) {
       return "An error occurred";
@@ -63,7 +132,7 @@ export const Signup = () => {
   })();
 
   return (
-    <div className="w-2/3 md:w-1/2 p-2 lg:p-8 bg-gray-800 rounded-lg shadow-md items-center justify-center">
+    <div className="w-2/3 md:w-1/2 p-2 lg:px-8 bg-gray-800 rounded-lg shadow-md items-center justify-center">
       <h1 className="text-green-600 text-sm sm:text-md md:text-lg lg:text-xl">
         Welcome to MyCalendly
       </h1>
@@ -73,14 +142,33 @@ export const Signup = () => {
         <h3 className="text-red-500 text-sm mt-2">{signupErrorMessage}</h3>
       )}
 
+      <div className="space-y-3 mt-2 mb-4">
+        <div className="flex w-full justify-center min-h-[44px] items-center">
+          <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID || ""}>
+            <GoogleLogin
+              onSuccess={handleGoogleAuth}
+              onError={handleGoogleError}
+              text="signin_with"
+              width="300px"
+              size="large"
+              shape="rectangular"
+              logo_alignment="center"
+            />
+          </GoogleOAuthProvider>
+        </div>
+      </div>
+      <div className="relative mt-1">
+        <Separator />
+        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 px-4 text-sm text-muted-foreground z-10">
+          or continue with email
+        </span>
+      </div>
+
       <form onSubmit={handleSubmit(onSignUp)} noValidate>
         <div className="w-full flex justify-between gap-6">
           {/* firstName */}
           <div className="w-full">
-            <Label
-              htmlFor="firstName"
-              className="block mt-4 mb-2 text-left text-white font-bold"
-            >
+            <Label htmlFor="firstName" className="mt-4">
               First Name:
             </Label>
             <Input
@@ -99,10 +187,7 @@ export const Signup = () => {
 
           {/* lastname */}
           <div className="w-full">
-            <Label
-              htmlFor="lastName"
-              className="block mt-4 mb-2 text-left text-white font-bold"
-            >
+            <Label htmlFor="lastName" className="mt-4">
               Last Name:
             </Label>
             <Input
@@ -120,10 +205,7 @@ export const Signup = () => {
         </div>
 
         {/* email */}
-        <Label
-          htmlFor="email"
-          className="block mt-4 mb-2 text-left text-white font-bold"
-        >
+        <Label htmlFor="email" className="mt-4">
           Email:
         </Label>
         <Input
@@ -140,10 +222,7 @@ export const Signup = () => {
         )}
 
         {/* password */}
-        <Label
-          htmlFor="password"
-          className="block mt-4 mb-2 text-left text-white font-bold"
-        >
+        <Label htmlFor="password" className="mt-4">
           Password:
         </Label>
         <Input
@@ -160,10 +239,7 @@ export const Signup = () => {
         )}
 
         {/* confirm password */}
-        <Label
-          htmlFor="confirmPassword"
-          className="block mt-4 mb-2 text-left text-white font-bold"
-        >
+        <Label htmlFor="confirmPassword" className="mt-4">
           Confirm Password:
         </Label>
         <Input

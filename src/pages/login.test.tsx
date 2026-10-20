@@ -6,6 +6,25 @@ import { Provider } from "react-redux";
 import { store } from "../app/store";
 import { MemoryRouter } from "react-router-dom";
 
+vi.mock("@react-oauth/google", () => ({
+  GoogleOAuthProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+  GoogleLogin: ({ onSuccess }: { onSuccess: (response: unknown) => void }) => (
+    <button
+      type="button"
+      onClick={() =>
+        onSuccess({
+          credential: "mock-google-credential",
+          clientId: "mock-client-id",
+        })
+      }
+    >
+      Sign in with Google
+    </button>
+  ),
+}));
+
 // Mock the RTK Query hook so tests don't require the api reducer/middleware
 const mockLogin = vi.fn((data: { email: string; password: string }) => ({
   unwrap: async () => ({
@@ -17,6 +36,14 @@ const mockLogin = vi.fn((data: { email: string; password: string }) => ({
 vi.mock("../app/services/authApi", () => ({
   useLoginMutation: () => [
     mockLogin,
+    { isLoading: false, isError: false, error: undefined },
+  ],
+  useGoogleAuthMutation: () => [
+    vi.fn(async () => ({
+      unwrap: async () => ({
+        data: { user: { id: "1" }, token: "mock-google-token" },
+      }),
+    })),
     { isLoading: false, isError: false, error: undefined },
   ],
 }));
@@ -43,6 +70,20 @@ describe("Login component", () => {
     expect(passwordLabel).toBeInTheDocument();
     expect(passwordInput).toBeInTheDocument();
     expect(loginButton).toBeInTheDocument();
+  });
+
+  it("renders the Google login button", () => {
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <Login />
+        </MemoryRouter>
+      </Provider>,
+    );
+    const googleLoginButton = screen.getByRole("button", {
+      name: /sign in with google/i,
+    });
+    expect(googleLoginButton).toBeInTheDocument();
   });
 
   it("displays validation error for invalid email", async () => {

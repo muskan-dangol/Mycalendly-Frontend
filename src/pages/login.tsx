@@ -1,25 +1,44 @@
 import { useEffect } from "react";
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
-import { isTokenValid } from "../lib/utils";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  GoogleLogin,
+  GoogleOAuthProvider,
+  type CredentialResponse,
+} from "@react-oauth/google";
+import { isTokenValid } from "../lib/utils";
 import { setCredentials, logout } from "../features/user/authSlice";
-import { useLoginMutation } from "../app/services/authApi";
+import {
+  useLoginMutation,
+  useGoogleAuthMutation,
+} from "../app/services/authApi";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Lock, Mail } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { Separator } from "../components/ui/separator";
+import { useToast } from "../hooks/useToast";
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+const delay = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
 
 export const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [login, { isLoading, isError, error }] = useLoginMutation();
+  const [googleAuth] = useGoogleAuthMutation();
   const { isAuthenticated } = useAuth();
+  const { toast } = useToast();
 
   const loginErrorMessage = (() => {
     if (!isError || !error) {
@@ -72,6 +91,58 @@ export const Login = () => {
     }
   };
 
+  // Handler functions defined before hooks so they can capture correct state
+  const handleGoogleSuccess = async (
+    credentialResponse: CredentialResponse,
+  ) => {
+    if (!credentialResponse.credential || !credentialResponse.clientId) {
+      toast({
+        title: "Google login failed",
+        description: "No credential received from Google",
+        variant: "destructive",
+      });
+
+      return;
+    }
+    try {
+      const authResponse = await googleAuth({
+        idToken: credentialResponse.credential,
+        clientId: credentialResponse.clientId,
+      }).unwrap();
+
+      // Store user data in auth context
+      const authData = authResponse.data;
+      if (!authData?.user || !authData?.token) {
+        throw new Error(
+          "Google login response did not include auth credentials",
+        );
+      }
+
+      dispatch(setCredentials({ user: authData.user, token: authData.token }));
+
+      await delay(import.meta.env.POST_LOGIN_REDIRECT_DELAY_MS);
+      navigate("/", { replace: true });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to login with Google. Please try again.";
+      toast({
+        title: "Google login failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast({
+      title: "Google login failed",
+      description: "Failed to authenticate with Google",
+      variant: "destructive",
+    });
+  };
+
   // Clear any stale auth data if token is invalid
   useEffect(() => {
     const token = localStorage.getItem("userToken");
@@ -103,6 +174,28 @@ export const Login = () => {
       {isError && (
         <h3 className="text-red-500 text-sm mt-2">{loginErrorMessage}</h3>
       )}
+
+      <div className="space-y-3 mt-2 mb-4">
+        <div className="flex w-full justify-center min-h-[44px] items-center">
+          <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID || ""}>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              text="signin_with"
+              width="200px"
+              size="large"
+              shape="rectangular"
+              logo_alignment="center"
+            />
+          </GoogleOAuthProvider>
+        </div>
+      </div>
+      <div className="relative mt-1">
+        <Separator />
+        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 px-4 text-sm text-muted-foreground z-10">
+          or continue with email
+        </span>
+      </div>
 
       <form onSubmit={handleSubmit(onLogin)} noValidate>
         {/* email field */}

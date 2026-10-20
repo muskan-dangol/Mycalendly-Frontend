@@ -7,6 +7,7 @@ import { EmailVerification } from "./pages/emailVerification";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ResetPassword } from "./pages/resetPassword";
 import { PasswordResetRequest } from "./pages/passwordResetRequest";
+import { Toaster } from "./components/ui/toaster";
 
 const router = createBrowserRouter([
   { path: "/signup", element: <Signup /> },
@@ -19,7 +20,12 @@ const router = createBrowserRouter([
 ]);
 
 const App = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <Toaster />
+    </>
+  );
 };
 
 export default App;

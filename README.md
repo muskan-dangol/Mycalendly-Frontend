@@ -6,6 +6,7 @@ Simple integration to build a Calendly-like scheduling service (development).
 ## Features
 
 - User authentication with login, signup, and password reset flows
+- google authentication
 - Email verification and confirmation workflows
 - Protected routes for authenticated access
 - Modern UI built with React, TypeScript, and Vite

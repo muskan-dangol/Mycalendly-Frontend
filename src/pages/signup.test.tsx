@@ -6,6 +6,25 @@ import { Provider } from "react-redux";
 import { store } from "../app/store";
 import { MemoryRouter } from "react-router-dom";
 
+vi.mock("@react-oauth/google", () => ({
+  GoogleOAuthProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+  GoogleLogin: ({ onSuccess }: { onSuccess: (response: unknown) => void }) => (
+    <button
+      type="button"
+      onClick={() =>
+        onSuccess({
+          credential: "mock-google-credential",
+          clientId: "mock-client-id",
+        })
+      }
+    >
+      Sign up with Google
+    </button>
+  ),
+}));
+
 // Mock the RTK Query hook so tests don't require the api reducer/middleware
 const mockRegister = vi.fn(
   (data: {
@@ -27,7 +46,19 @@ const mockRegister = vi.fn(
 );
 
 vi.mock("../app/services/authApi", () => ({
-  useRegisterMutation: () => [mockRegister, { isLoading: false, isError: false, error: undefined }],
+  useRegisterMutation: () => [
+    mockRegister,
+    { isLoading: false, isError: false, error: undefined },
+  ],
+
+  useGoogleAuthMutation: () => [
+    vi.fn(async () => ({
+      unwrap: async () => ({
+        data: { user: { id: "1" }, token: "mock-google-token" },
+      }),
+    })),
+    { isLoading: false, isError: false, error: undefined },
+  ],
 }));
 
 describe("Signup Component", () => {
@@ -67,6 +98,20 @@ describe("Signup Component", () => {
     expect(confirmPasswordInput).toBeInTheDocument();
   });
 
+  it("renders the Google login button", () => {
+    render(
+      <Provider store={store}>
+        <MemoryRouter>
+          <Signup />
+        </MemoryRouter>
+      </Provider>,
+    );
+    const googleSignupButton = screen.getByRole("button", {
+      name: /sign up with google/i,
+    });
+    expect(googleSignupButton).toBeInTheDocument();
+  });
+
   it("display validation error for invalid email", async () => {
     const user = userEvent.setup();
     render(
@@ -81,7 +126,7 @@ describe("Signup Component", () => {
     const firstNameInput = screen.getByLabelText(/first name/i);
     const lastNameInput = screen.getByLabelText(/last name/i);
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
-    const signupButton = screen.getByRole("button", { name: /sign up/i });
+    const signupButton = screen.getByRole("button", { name: /^sign up$/i });
 
     await user.type(emailInput, "invalid");
     await user.type(passwordInput, "password123");
@@ -108,7 +153,7 @@ describe("Signup Component", () => {
     const firstNameInput = screen.getByLabelText(/first name/i);
     const lastNameInput = screen.getByLabelText(/last name/i);
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
-    const signupButton = screen.getByRole("button", { name: /sign up/i });
+    const signupButton = screen.getByRole("button", { name: /^sign up$/i });
 
     await user.type(emailInput, "test@example.com");
     await user.type(passwordInput, "123");
@@ -137,7 +182,7 @@ describe("Signup Component", () => {
     const firstNameInput = screen.getByLabelText(/first name/i);
     const lastNameInput = screen.getByLabelText(/last name/i);
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
-    const signupButton = screen.getByRole("button", { name: /sign up/i });
+    const signupButton = screen.getByRole("button", { name: /^sign up$/i });
 
     await user.type(emailInput, "test@example.com");
     await user.type(passwordInput, "password123");
@@ -159,7 +204,7 @@ describe("Signup Component", () => {
         </MemoryRouter>
       </Provider>,
     );
-    const signupButton = screen.getByRole("button", { name: /sign up/i });
+    const signupButton = screen.getByRole("button", { name: /^sign up$/i });
 
     await user.click(signupButton);
 
